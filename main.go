@@ -3,7 +3,6 @@ package main
 import (
 	//"database/sql"
 	"github.com/ivansukach/profile-service/repositories"
-	_ "github.com/jackc/pgx"
 	"net"
 
 	//"github.com/jmoiron/sqlx"
@@ -27,5 +26,5 @@ func main() {
 		log.Error(err)
 	}
 
-	defer rps.closeDB()
+	defer rps.CloseDB()
 }

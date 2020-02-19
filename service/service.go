@@ -9,78 +9,63 @@ import (
 type ProfileService struct {
 	r *repositories.ProfileRepository
 }
-type User struct {
-	Password   string
-	Name       string
-	Surname    string
-	Age        int32
-	Gender     bool
-	HasAnyPets bool
-	Employed   bool
-}
-type Profile struct {
-	Login string
-	User  User
-}
 
-func (ps ProfileService) createUser(user User, login string) error {
+func (ps ProfileService) CreateUser(user repositories.Profile) error {
 	log.Info("createUser")
-	rows, err := ps.r.SelectFromDB(login)
+	rows, err := ps.r.SelectFromDB(user.Login)
 	if err != nil || rows == nil {
-		ps.r.InsertIntoDB(login, user)
+		ps.r.InsertIntoDB(user)
 		return nil
 	}
 	log.Warning("Already exists")
 	return err
 }
-func (ps ProfileService) updateUser(user User, login string) error {
+func (ps ProfileService) UpdateUser(user repositories.Profile) error {
 	log.Info("updateUser")
-	_, err := ps.r.SelectFromDB(login)
+	_, err := ps.r.SelectFromDB(user.Login)
 	if err == nil {
-		ps.r.UpdateDB(login, user)
+		ps.r.UpdateDB(user)
 		return nil
 	}
 	return err
 }
-func (ps ProfileService) deleteUser(login string) error {
+func (ps ProfileService) DeleteUser(login string) error {
 	log.Info("deleteUser")
 	err := ps.r.DeleteFromDB(login)
 	return err
 }
-func (ps ProfileService) getUserByLogin(login string) *User {
+func (ps ProfileService) GetUserByLogin(login string) (*repositories.Profile, error) {
 	log.Info("getUserByLogin")
 	rows, err := ps.r.SelectFromDB(login)
 	if err != nil {
 		log.Warning("There is not any record with value " + login + "in field Login")
-		return nil
+		return nil, err
 	}
-	u := User{}
-	err = rows.Scan(&login, &u.Name, &u.Surname, &u.Password, &u.Gender, &u.HasAnyPets, &u.Employed, &u.Age)
+	u := repositories.Profile{}
+	err = rows.Scan(&u.Login, &u.Name, &u.Surname, &u.Password, &u.Gender, &u.HasAnyPets, &u.Employed, &u.Age)
 	if err != nil {
 		fmt.Println(err)
 		log.Warning("Error when scanning DB")
 	}
-	return &u
+	return &u, err
 }
-func (ps ProfileService) listing() (*[]Profile, error) {
+func (ps ProfileService) Listing() ([]repositories.Profile, error) {
 	log.Info("Listing")
 	rows, err := ps.r.SelectAllFromDB()
-	var list []Profile
+	var list []repositories.Profile
 	if err != nil {
 		for rows.Next() {
-			u := User{}
-			login := ""
-			err := rows.Scan(&login, &u.Name, &u.Surname, &u.Password, &u.Gender, &u.HasAnyPets, &u.Employed, &u.Age)
+			u := repositories.Profile{}
+			err := rows.Scan(&u.Login, &u.Name, &u.Surname, &u.Password, &u.Gender, &u.HasAnyPets, &u.Employed, &u.Age)
 			if err != nil {
 				fmt.Println(err)
 				log.Warning("Error when scanning DB")
 				continue
 			}
-			list[len(list)-1].User = u
-			list[len(list)-1].Login = login
+			list[len(list)-1] = u
 		}
 	} else {
 		return nil, err
 	}
-	return &list, nil
+	return list, nil
 }
