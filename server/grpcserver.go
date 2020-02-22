@@ -23,7 +23,7 @@ func (s *Server) Create(ctx context.Context, req *protocol.CreateRequest) (*prot
 	user.Gender = req.Profile.Gender
 	user.Employed = req.Profile.Employed
 	user.HasAnyPets = req.Profile.HasAnyPets
-	err := s.ps.CreateUser(user)
+	err := s.ps.Create(user)
 	if err != nil {
 		log.Error(err)
 		return &protocol.SuccessResponse{Success: false}, err
@@ -40,7 +40,7 @@ func (s *Server) Update(ctx context.Context, req *protocol.UpdateRequest) (*prot
 	user.Gender = req.Profile.Gender
 	user.Employed = req.Profile.Employed
 	user.HasAnyPets = req.Profile.HasAnyPets
-	err := s.ps.UpdateUser(user)
+	err := s.ps.Update(user)
 	if err != nil {
 		log.Error(err)
 		return &protocol.SuccessResponse{Success: false}, err
@@ -48,7 +48,7 @@ func (s *Server) Update(ctx context.Context, req *protocol.UpdateRequest) (*prot
 	return &protocol.SuccessResponse{Success: true}, nil
 }
 func (s *Server) Delete(ctx context.Context, req *protocol.DeleteRequest) (*protocol.SuccessResponse, error) {
-	err := s.ps.DeleteUser(req.Login)
+	err := s.ps.Delete(req.Login)
 	if err != nil {
 		log.Error(err)
 		return &protocol.SuccessResponse{Success: false}, err
@@ -57,7 +57,7 @@ func (s *Server) Delete(ctx context.Context, req *protocol.DeleteRequest) (*prot
 }
 func (s *Server) GetByLogin(ctx context.Context, req *protocol.GetByLoginRequest) (*protocol.GetByLoginResponse, error) {
 	var resp protocol.GetByLoginResponse
-	user, err := s.ps.GetUserByLogin(req.Login)
+	user, err := s.ps.GetByLogin(req.Login)
 	if err != nil {
 		log.Error(err)
 		return nil, err
